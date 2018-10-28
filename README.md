@@ -7,7 +7,8 @@ Gym environment class and examples for Mode Estimation Task.
 
 - Origianl Paper
 "Better Safe than Sorry: Evidence Accumulation Allows for Safe Reinforcement Learning",
-Akshat Agarwal, Abhinau Kumar V, Kyle Dunovan, Erik Peterson, Timothy Verstynen, Katia Sycara.
+Akshat Agarwal, Abhinau Kumar V, Kyle Dunovan, Erik Peterson, Timothy Verstynen, Katia Sycara,
+2018.
 https://arxiv.org/abs/1809.09147
 
 - OpenAI Gym
