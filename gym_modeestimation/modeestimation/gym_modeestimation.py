@@ -37,11 +37,11 @@ class ModeEstimationEnv(gym.Env):
         # task variables
         self.eps = eps
         self.n0 = np.random.randint(self.N_MAX)
-        self.prob = self._make_prob(self.n0, self.eps)
+        self.prob = self._make_prob(self.n0, self.eps, self.N_MAX)
         self.steps = 0
 
     def step(self, action):
-        '''see equation (1).'''
+        '''see equation (1) in https://arxiv.org/pdf/1809.09147.pdf'''
         self.steps += 1
         if self.steps < self.T_MAX:
             if action == self.NOOP:
@@ -56,7 +56,7 @@ class ModeEstimationEnv(gym.Env):
 
     def reset(self):
         self.n0 = np.random.randint(self.N_MAX)
-        self.prob = self._make_prob(self.n0, self.eps)
+        self.prob = self._make_prob(self.n0, self.eps, self.N_MAX)
         self.steps = 0
         obs = np.random.choice(self.N_MAX, p=self.prob)
         return obs
@@ -71,5 +71,6 @@ class ModeEstimationEnv(gym.Env):
         np.random.seed(seed)
         return [seed]
 
-    def _make_prob(self, n0, eps):
-        return np.array([ 1 - eps if n == n0 else eps / (self.N_MAX - 1) for n in range(self.N_MAX) ])
+    def _make_prob(self, n0, eps, n_max):
+        '''see equation (5) in https://arxiv.org/pdf/1809.09147.pdf'''
+        return np.array([ 1 - eps if n == n0 else eps / (n_max - 1) for n in range(n_max) ])
