@@ -18,7 +18,7 @@ import numpy as np
 import gym
 
 class ModeEstimationEnv(gym.Env):
-    '''see https://github.com/openai/gym/blob/master/gym/core.py'''
+    '''see https://github.com/openai/gym/blob/master/gym/core.py and https://arxiv.org/pdf/1809.09147.pdf'''
 
     metadata = {'render.modes': ['human']}
 
@@ -62,8 +62,7 @@ class ModeEstimationEnv(gym.Env):
         return obs
 
     def render(self, mode='human', close=False):
-        print(self.eps, self.n0, self.steps, self.prob)
-        # TODO
+        print(self.eps, self.n0, self.steps, self.prob) # TODO
         return None
 
     def seed(self, seed=None):
