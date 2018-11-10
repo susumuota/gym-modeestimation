@@ -12,7 +12,7 @@ def main():
         action = env.action_space.sample()
         #action = env.NOOP
         obs, reward, done, info = env.step(action)
-        print(env.steps, env.n0, action, obs, reward, done, info)
+        print(env.t, env.n0, action, obs, reward, done, info)
         #env.render()
         if done:
             obs = env.reset()

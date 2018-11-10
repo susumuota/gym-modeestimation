@@ -212,7 +212,7 @@ def train_tau_actor_critic_1(env, acc, max_episode, tau_list):
             running_loss += loss
             result_history.append([reward, env.t])
             if episode % 500 == 0:
-                print('\t'.join([ str(item) for item in [ episode, running_loss / 1000, acc.get_tau(), env.EPS ] ]))
+                print('\t'.join([ str(item) for item in [ episode, running_loss / 500, acc.get_tau(), env.EPS ] ]))
                 last_result = np.sum(np.array(result_history), axis=0) / len(result_history)
                 result_history = []
                 running_loss = 0.0
