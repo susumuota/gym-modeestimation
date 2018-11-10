@@ -16,53 +16,54 @@
 
 import numpy as np
 import gym
+import gym.spaces
 
 class ModeEstimationEnv(gym.Env):
     '''see https://github.com/openai/gym/blob/master/gym/core.py and https://arxiv.org/pdf/1809.09147.pdf'''
 
     metadata = {'render.modes': ['human']}
 
-    N_MAX = 10
-    T_MAX = 30
-    NOOP = N_MAX
-    R1 = T_MAX
-    R2 = -T_MAX
-    R3 = -T_MAX
-
-    def __init__(self, eps=0.0):
+    def __init__(self, eps=0.0, n_max=10, t_max=30):
+        # task constants
+        self.EPS = eps
+        self.N_MAX = n_max
+        self.T_MAX = t_max
+        self.NOOP = self.N_MAX
+        self.R1 = self.T_MAX
+        self.R2 = -self.T_MAX
+        self.R3 = -self.T_MAX
+        # task variables
+        self.n0 = np.random.randint(self.N_MAX)
+        self.p = self._make_prob(self.n0, self.EPS, self.N_MAX)
+        self.t = 0
         # gym variables
         self.observation_space = gym.spaces.Discrete(self.N_MAX) # 0-9
         self.action_space = gym.spaces.Discrete(self.N_MAX + 1) # 0-9 + NOOP
         self.reward_range = (-self.T_MAX, self.T_MAX)
-        # task variables
-        self.eps = eps
-        self.n0 = np.random.randint(self.N_MAX)
-        self.prob = self._make_prob(self.n0, self.eps, self.N_MAX)
-        self.steps = 0
 
     def step(self, action):
         '''see equation (1) in https://arxiv.org/pdf/1809.09147.pdf'''
-        self.steps += 1
-        if self.steps < self.T_MAX:
+        self.t += 1
+        if self.t < self.T_MAX:
             if action == self.NOOP:
-                obs = np.random.choice(self.N_MAX, p=self.prob)
-                return obs, 0, False, 'T <= T_MAX and No guess'
+                obs = np.random.choice(self.N_MAX, p=self.p)
+                return obs, 0, False, 't <= T_max and No guess'
             elif action == self.n0:
-                return 0, self.R1 - (self.steps - 1), True, 'T <= T_MAX and Correct guess'
+                return 0, self.R1 - (self.t - 1), True, 't <= T_max and Correct guess'
             else:
-                return 0, self.R2, True, 'T <= T_MAX and Incorrect guess'
+                return 0, self.R2, True, 't <= T_max and Incorrect guess'
         else:
-            return 0, self.R3, True, 'T > T_MAX'
+            return 0, self.R3, True, 't > T_max'
 
     def reset(self):
         self.n0 = np.random.randint(self.N_MAX)
-        self.prob = self._make_prob(self.n0, self.eps, self.N_MAX)
-        self.steps = 0
-        obs = np.random.choice(self.N_MAX, p=self.prob)
+        self.p = self._make_prob(self.n0, self.EPS, self.N_MAX)
+        self.t = 0
+        obs = np.random.choice(self.N_MAX, p=self.p)
         return obs
 
     def render(self, mode='human', close=False):
-        print(self.eps, self.n0, self.steps, self.prob) # TODO
+        print(self.EPS, self.n0, self.t, self.p) # TODO
         return None
 
     def seed(self, seed=None):

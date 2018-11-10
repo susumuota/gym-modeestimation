@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import gym
+import gym.spaces
 import gym_modeestimation
 
 def main():
