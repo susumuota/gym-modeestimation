@@ -44,16 +44,16 @@ class ModeEstimationEnv(gym.Env):
     def step(self, action):
         '''see equation (1) in https://arxiv.org/pdf/1809.09147.pdf'''
         self.t += 1
+        obs = np.random.choice(self.N_MAX, p=self.p)
         if self.t < self.T_MAX:
             if action == self.NOOP:
-                obs = np.random.choice(self.N_MAX, p=self.p)
                 return obs, 0, False, 't <= T_max and No guess'
             elif action == self.n0:
-                return 0, self.R1 - (self.t - 1), True, 't <= T_max and Correct guess'
+                return obs, self.R1 - (self.t - 1), True, 't <= T_max and Correct guess'
             else:
-                return 0, self.R2, True, 't <= T_max and Incorrect guess'
+                return obs, self.R2, True, 't <= T_max and Incorrect guess'
         else:
-            return 0, self.R3, True, 't > T_max'
+            return obs, self.R3, True, 't > T_max'
 
     def reset(self):
         self.n0 = np.random.randint(self.N_MAX)
