@@ -6,7 +6,6 @@ import gym_modeestimation
 
 def main():
     env = gym.make('ModeEstimationEPS00-v0')
-    #env = gym.make('ModeEstimationEPS04-v0')
     obs = env.reset()
     for i in range(40):
         action = env.action_space.sample()
