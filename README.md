@@ -38,6 +38,7 @@ pip uninstall gym
 
 ```python
 import gym
+import gym.spaces
 import gym_modeestimation
 
 def main():
@@ -45,8 +46,9 @@ def main():
     obs = env.reset()
     for i in range(40):
         action = env.action_space.sample()
+        #action = env.NOOP
         obs, reward, done, info = env.step(action)
-        print(env.steps, env.n0, action, obs, reward, done, info)
+        print(env.t, env.n0, action, obs, reward, done, info)
         if done:
             obs = env.reset()
     env.close()
