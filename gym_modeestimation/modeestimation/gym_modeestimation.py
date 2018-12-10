@@ -37,7 +37,7 @@ class ModeEstimationEnv(gym.Env):
         self.p = self._make_prob(self.n0, self.EPS, self.N_MAX)
         self.t = 0
         # gym variables
-        self.observation_space = gym.spaces.Discrete(self.N_MAX) # 0-9
+        self.observation_space = gym.spaces.Discrete(1) # 0-9
         self.action_space = gym.spaces.Discrete(self.N_MAX + 1) # 0-9 + NOOP
         self.reward_range = (-self.T_MAX, self.T_MAX)
 
