@@ -72,7 +72,7 @@ class ModeEstimationEnv(gym.Env):
 
     def seed(self, seed=None):
         '''TODO: seeding'''
-        np.random.seed(seed)
+        # np.random.seed(seed)
         return [seed]
 
     def _make_prob(self, n0, eps, n_max):
