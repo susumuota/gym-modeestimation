@@ -251,11 +251,6 @@ class EvidenceRL(object):
         self.clear_memory()
         return loss.item()
 
-def number_to_onehot(n, dim=10):
-    onehot = np.zeros(dim)
-    onehot[n] = 1.0
-    return onehot
-
 def number_to_binary(n, dim=4):
     binary = np.zeros(dim)
     for i, value in enumerate(format(n, '0{}b'.format(dim))):
