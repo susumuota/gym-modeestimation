@@ -156,8 +156,14 @@ class EvidenceNetwork(nn.Module):
         self.beta_head = nn.Linear(hidden_dim, output_dim)
         self.value_head = nn.Linear(hidden_dim, 1)
 
+        #self.alpha_head.weight.data.mul_(0.1)
+        #self.alpha_head.bias.data.mul_(0.0)
+        #self.beta_head.weight.data.mul_(0.1)
+        #self.beta_head.bias.data.mul_(0.0)
+
     def forward(self, x):
         x = F.relu(self.affine1(x))
+        #x = torch.tanh(self.affine1(x))
         # alpha and beta must be non-negative float
         #alpha_scores = F.relu(self.alpha_head(x)) # TODO: relu? any other options?
         #beta_scores = F.relu(self.beta_head(x))
@@ -201,7 +207,7 @@ class EvidenceRL(object):
 
     def policy_to_action(self, alpha, beta):
         # alpha and beta must be non-negative float
-        eps = 1e-8 # to avoid inf and nan
+        eps = 1e-6 # to avoid inf and nan
         p = dist.Beta(alpha + eps, beta + eps)
         action = p.sample()
         log_prob = p.log_prob(action)
@@ -257,12 +263,11 @@ def number_to_binary(n, dim=4):
     return binary
 
 def env_name(eps):
-    return 'ModeEstimationEPS{}-v0'.format(str(int(eps * 10)).zfill(2))
+    return 'ModeEstimationOnehot{}-v0'.format(str(int(eps * 10)))
 
 def run_mc_1(env, acc, max_episode):
     def f(obs):
-        k_t = number_to_onehot(obs, env.observation_space.n)
-        return k_t
+        return obs
     episode = 0
     result_history = []
     obs = env.reset()
@@ -272,13 +277,13 @@ def run_mc_1(env, acc, max_episode):
     for i in range(max_episode * env.T_MAX):
         action = acc.get_action()
         obs, reward, done, info = env.step(action)
-        k_t = number_to_onehot(obs, env.observation_space.n)
+        k_t = f(obs)
         acc.accumulate(k_t)
         if done:
             result_history.append([reward, env.t])
             episode += 1
             obs = env.reset()
-            k_t = number_to_onehot(obs, env.observation_space.n)
+            k_t = f(obs)
             acc.reset()
             acc.accumulate(k_t)
         if episode >= max_episode:
@@ -299,7 +304,7 @@ def run_mc(seed, max_episode):
 
 def train_tau_actor_critic_1(env, acc, max_episode, tau_list):
     def f(obs):
-        k_t = number_to_onehot(obs, env.observation_space.n)
+        k_t = obs
         return k_t
     accrl = AccumulatorRL(env.observation_space.n, int(env.observation_space.n * 2.5), len(tau_list)) # AccumulatorRL(10, 25, 10)
     episode = 0
@@ -358,12 +363,12 @@ def train_tau_actor_critic(seed, max_episode):
 
 def train_f_tau_actor_critic_1(env, acc, max_episode, tau_list):
     def f(obs, dim=4):
-        # k_t = number_to_onehot(obs, env.observation_space.n)
+        # k_t = obs
         k_t, k_t_log_prob, k_t_value = evirl.get_action(accrl.numpy_to_tensor(number_to_binary(obs, dim)))
         return k_t, k_t_log_prob, k_t_value
     binary_dim = len(format(env.observation_space.n, 'b')) # 4
     accrl = AccumulatorRL(env.observation_space.n, int(env.observation_space.n * 2.5), len(tau_list)) # AccumulatorRL(10, 25, 5)
-    evirl = EvidenceRL(binary_dim, env.observation_space.n * 2, env.observation_space.n) # AccumulatorRL(4, 20, 10)
+    evirl = EvidenceRL(binary_dim, env.observation_space.n * 2, env.observation_space.n) # EvidenceRL(4, 20, 10)
     episode = 0
     result_history = []
     running_k_t_loss = 0.0
@@ -375,7 +380,6 @@ def train_f_tau_actor_critic_1(env, acc, max_episode, tau_list):
     acc.accumulate(k_t)
     for i in range(max_episode * env.T_MAX):
         # decide tau
-        k_t, k_t_log_prob, k_t_value = f(obs)
         tau_index, tau_log_prob, tau_value = accrl.get_action(k_t)
         acc.set_tau(tau_list[tau_index.item()])
         # decide action (0-9 or NOOP)
@@ -425,8 +429,8 @@ def train_f_tau_actor_critic(seed, max_episode):
 
 def main():
     #run_mc(0, 10000)
-    #train_tau_actor_critic(0, 50000)
-    train_f_tau_actor_critic(0, 10000)
+    train_tau_actor_critic(0, 50000)
+    #train_f_tau_actor_critic(0, 10000)
 
 if __name__ == '__main__':
     main()
